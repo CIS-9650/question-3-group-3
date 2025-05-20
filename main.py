@@ -160,7 +160,6 @@ DATA_SOURCES = {
     ],
 }
 
-
 def parse_height_to_inches(height_str):
     """
     Convert height string to inches
@@ -219,7 +218,6 @@ def parse_height_to_inches(height_str):
         print(f"Error processing height: {height_str}, error: {str(e)}")
         return None
 
-
 def fetch_html(url, max_retries=3, retry_delay=5):
     """
     Get webpage HTML content with retry mechanism
@@ -257,7 +255,6 @@ def fetch_html(url, max_retries=3, retry_delay=5):
             print(f"Error fetching {url}: {e}")
             return None
 
-
 def extract_data(html, school_name, url):
     """
     Extract athlete data from HTML
@@ -294,7 +291,6 @@ def extract_data(html, school_name, url):
     print(f"Extracted {len(players_data)} athlete records from {school_name}")
     return players_data
 
-
 def extract_sidearm_roster_player(soup, domain):
     """Handle websites using sidearm-roster-player class"""
     players_data = []
@@ -326,7 +322,6 @@ def extract_sidearm_roster_player(soup, domain):
 
     return players_data
 
-
 def extract_york_athletics(soup):
     """Handle websites using table layout"""
     players_data = []
@@ -352,7 +347,6 @@ def extract_york_athletics(soup):
             players_data.append((name, height))
 
     return players_data
-
 
 def extract_sidearm_card_item(soup):
     """Handle websites using sidearm-list-card-item class"""
@@ -387,7 +381,6 @@ def extract_sidearm_card_item(soup):
 
     return players_data
 
-
 def extract_ballstate(soup):
     """Handle Ball State special case"""
     players_data = []
@@ -420,7 +413,6 @@ def extract_ballstate(soup):
             players_data.append((name, height))
 
     return players_data
-
 
 def extract_generic(soup, domain):
     """Generic parsing method, try common patterns"""
@@ -478,7 +470,6 @@ def extract_generic(soup, domain):
 
     return players_data
 
-
 def scrape_single_url(school_name, url, team_type):
     """
     Scrape athlete data from a single URL and save to CSV
@@ -517,7 +508,6 @@ def scrape_single_url(school_name, url, team_type):
 
     return True
 
-
 def scrape_team_data(team_type, school_filter=None, delay=2):
     """
     Scrape data for all schools of a specified team type
@@ -555,7 +545,6 @@ def scrape_team_data(team_type, school_filter=None, delay=2):
 
     return all_data
 
-
 def create_dataframe(data):
     """Convert scraped data to DataFrame"""
     # Create DataFrame containing name, height, and school
@@ -566,12 +555,10 @@ def create_dataframe(data):
 
     return df
 
-
 def save_to_csv(df, filename):
     """Save DataFrame to CSV file"""
     df.to_csv(filename, index=False)
     print(f"Data saved to {filename}")
-
 
 def parse_args():
     """Parse command line arguments"""
@@ -630,7 +617,6 @@ def parse_args():
         args.all = True
 
     return args
-
 
 def main():
     """Main function"""
@@ -698,6 +684,395 @@ def main():
     except Exception as e:
         print(f"An error occurred during program execution: {str(e)}")
 
+if __name__ == "__main__":
+    main()
+
+import numpy as np
+
+# Load CSV files
+def load_data():
+    print("Loading data files...")
+    mens_swimming = pd.read_csv("mens_swimming.csv")
+    womens_swimming = pd.read_csv("womens_swimming.csv")
+    mens_volleyball = pd.read_csv("mens_volleyball.csv")
+    womens_volleyball = pd.read_csv("womens_volleyball.csv")
+
+    return mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+
+# Calculate average heights
+def calculate_average_heights(
+    mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+):
+    print("\nTask 2.1: Calculate average heights for each team")
+    print("-" * 50)
+
+    # Calculate average using Height_Inches column, ignoring NaN values
+    mens_swimming_avg = mens_swimming["Height_Inches"].mean()
+    womens_swimming_avg = womens_swimming["Height_Inches"].mean()
+    mens_volleyball_avg = mens_volleyball["Height_Inches"].mean()
+    womens_volleyball_avg = womens_volleyball["Height_Inches"].mean()
+
+    # Print average heights (in inches and centimeters)
+    print(
+        f"Men's Swimming Team Average Height: {mens_swimming_avg:.2f} inches ({(mens_swimming_avg * 2.54):.2f} cm)"
+    )
+    print(
+        f"Women's Swimming Team Average Height: {womens_swimming_avg:.2f} inches ({(womens_swimming_avg * 2.54):.2f} cm)"
+    )
+    print(
+        f"Men's Volleyball Team Average Height: {mens_volleyball_avg:.2f} inches ({(mens_volleyball_avg * 2.54):.2f} cm)"
+    )
+    print(
+        f"Women's Volleyball Team Average Height: {womens_volleyball_avg:.2f} inches ({(womens_volleyball_avg * 2.54):.2f} cm)"
+    )
+
+    # Calculate differences between teams
+    swimming_diff = mens_swimming_avg - womens_swimming_avg
+    volleyball_diff = mens_volleyball_avg - womens_volleyball_avg
+    mens_diff = mens_volleyball_avg - mens_swimming_avg
+    womens_diff = womens_volleyball_avg - womens_swimming_avg
+
+    print("\nDifference Analysis:")
+    print(
+        f"Men vs Women Swimming Teams: {swimming_diff:.2f} inches ({(swimming_diff * 2.54):.2f} cm)"
+    )
+    print(
+        f"Men vs Women Volleyball Teams: {volleyball_diff:.2f} inches ({(volleyball_diff * 2.54):.2f} cm)"
+    )
+    print(
+        f"Men's Volleyball vs Men's Swimming: {mens_diff:.2f} inches ({(mens_diff * 2.54):.2f} cm)"
+    )
+    print(
+        f"Women's Volleyball vs Women's Swimming: {womens_diff:.2f} inches ({(womens_diff * 2.54):.2f} cm)"
+    )
+
+# Find tallest and shortest athletes
+def find_extreme_heights(
+    mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+):
+    print("\nTask 2.2: Find the 5 tallest and shortest athletes for each team")
+    print("-" * 50)
+
+    # Filter out records with NaN heights
+    mens_swimming_valid = mens_swimming.dropna(subset=["Height_Inches"])
+    womens_swimming_valid = womens_swimming.dropna(subset=["Height_Inches"])
+    mens_volleyball_valid = mens_volleyball.dropna(subset=["Height_Inches"])
+    womens_volleyball_valid = womens_volleyball.dropna(subset=["Height_Inches"])
+
+    # Men's Swimming Team
+    print("\nMen's Swimming Team - Tallest Athletes:")
+    tallest_men_swimming = mens_swimming_valid.nlargest(5, "Height_Inches")
+    for i, (_, player) in enumerate(tallest_men_swimming.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+    print("\nMen's Swimming Team - Shortest Athletes:")
+    shortest_men_swimming = mens_swimming_valid.nsmallest(5, "Height_Inches")
+    for i, (_, player) in enumerate(shortest_men_swimming.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+    # Men's Volleyball Team
+    print("\nMen's Volleyball Team - Tallest Athletes:")
+    tallest_men_volleyball = mens_volleyball_valid.nlargest(5, "Height_Inches")
+    for i, (_, player) in enumerate(tallest_men_volleyball.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+    print("\nMen's Volleyball Team - Shortest Athletes:")
+    shortest_men_volleyball = mens_volleyball_valid.nsmallest(5, "Height_Inches")
+    for i, (_, player) in enumerate(shortest_men_volleyball.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+    # Women's Swimming Team
+    print("\nWomen's Swimming Team - Tallest Athletes:")
+    tallest_women_swimming = womens_swimming_valid.nlargest(5, "Height_Inches")
+    for i, (_, player) in enumerate(tallest_women_swimming.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+    print("\nWomen's Swimming Team - Shortest Athletes:")
+    shortest_women_swimming = womens_swimming_valid.nsmallest(5, "Height_Inches")
+    for i, (_, player) in enumerate(shortest_women_swimming.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+    # Women's Volleyball Team
+    print("\nWomen's Volleyball Team - Tallest Athletes:")
+    tallest_women_volleyball = womens_volleyball_valid.nlargest(5, "Height_Inches")
+    for i, (_, player) in enumerate(tallest_women_volleyball.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+    print("\nWomen's Volleyball Team - Shortest Athletes:")
+    shortest_women_volleyball = womens_volleyball_valid.nsmallest(5, "Height_Inches")
+    for i, (_, player) in enumerate(shortest_women_volleyball.iterrows(), 1):
+        print(
+            f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+        )
+
+# Check for tie situations (if multiple athletes have the same height)
+def check_ties(mens_swimming, womens_swimming, mens_volleyball, womens_volleyball):
+    print("\nChecking for height tie situations")
+    print("-" * 50)
+
+    # Filter out records with NaN heights
+    mens_swimming_valid = mens_swimming.dropna(subset=["Height_Inches"])
+    womens_swimming_valid = womens_swimming.dropna(subset=["Height_Inches"])
+    mens_volleyball_valid = mens_volleyball.dropna(subset=["Height_Inches"])
+    womens_volleyball_valid = womens_volleyball.dropna(subset=["Height_Inches"])
+
+    # Get the heights of the top 5 and bottom 5
+    tallest_men_swimming_heights = mens_swimming_valid.nlargest(5, "Height_Inches")[
+        "Height_Inches"
+    ].values
+    shortest_men_swimming_heights = mens_swimming_valid.nsmallest(5, "Height_Inches")[
+        "Height_Inches"
+    ].values
+
+    tallest_men_volleyball_heights = mens_volleyball_valid.nlargest(5, "Height_Inches")[
+        "Height_Inches"
+    ].values
+    shortest_men_volleyball_heights = mens_volleyball_valid.nsmallest(
+        5, "Height_Inches"
+    )["Height_Inches"].values
+
+    tallest_women_swimming_heights = womens_swimming_valid.nlargest(5, "Height_Inches")[
+        "Height_Inches"
+    ].values
+    shortest_women_swimming_heights = womens_swimming_valid.nsmallest(
+        5, "Height_Inches"
+    )["Height_Inches"].values
+
+    tallest_women_volleyball_heights = womens_volleyball_valid.nlargest(
+        5, "Height_Inches"
+    )["Height_Inches"].values
+    shortest_women_volleyball_heights = womens_volleyball_valid.nsmallest(
+        5, "Height_Inches"
+    )["Height_Inches"].values
+
+    # Check if other athletes are tied with the top 5 or bottom 5
+    # Men's Swimming Team
+    if (
+        len(
+            mens_swimming_valid[
+                mens_swimming_valid["Height_Inches"] >= tallest_men_swimming_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nMen's Swimming Team has height ties (tallest):")
+        tied_players = mens_swimming_valid[
+            mens_swimming_valid["Height_Inches"] >= tallest_men_swimming_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height greater than or equal to {tallest_men_swimming_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+    if (
+        len(
+            mens_swimming_valid[
+                mens_swimming_valid["Height_Inches"]
+                <= shortest_men_swimming_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nMen's Swimming Team has height ties (shortest):")
+        tied_players = mens_swimming_valid[
+            mens_swimming_valid["Height_Inches"] <= shortest_men_swimming_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height less than or equal to {shortest_men_swimming_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+    # Men's Volleyball Team
+    if (
+        len(
+            mens_volleyball_valid[
+                mens_volleyball_valid["Height_Inches"]
+                >= tallest_men_volleyball_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nMen's Volleyball Team has height ties (tallest):")
+        tied_players = mens_volleyball_valid[
+            mens_volleyball_valid["Height_Inches"] >= tallest_men_volleyball_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height greater than or equal to {tallest_men_volleyball_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+    if (
+        len(
+            mens_volleyball_valid[
+                mens_volleyball_valid["Height_Inches"]
+                <= shortest_men_volleyball_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nMen's Volleyball Team has height ties (shortest):")
+        tied_players = mens_volleyball_valid[
+            mens_volleyball_valid["Height_Inches"]
+            <= shortest_men_volleyball_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height less than or equal to {shortest_men_volleyball_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+    # Women's Swimming Team
+    if (
+        len(
+            womens_swimming_valid[
+                womens_swimming_valid["Height_Inches"]
+                >= tallest_women_swimming_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nWomen's Swimming Team has height ties (tallest):")
+        tied_players = womens_swimming_valid[
+            womens_swimming_valid["Height_Inches"] >= tallest_women_swimming_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height greater than or equal to {tallest_women_swimming_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+    if (
+        len(
+            womens_swimming_valid[
+                womens_swimming_valid["Height_Inches"]
+                <= shortest_women_swimming_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nWomen's Swimming Team has height ties (shortest):")
+        tied_players = womens_swimming_valid[
+            womens_swimming_valid["Height_Inches"]
+            <= shortest_women_swimming_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height less than or equal to {shortest_women_swimming_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+    # Women's Volleyball Team
+    if (
+        len(
+            womens_volleyball_valid[
+                womens_volleyball_valid["Height_Inches"]
+                >= tallest_women_volleyball_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nWomen's Volleyball Team has height ties (tallest):")
+        tied_players = womens_volleyball_valid[
+            womens_volleyball_valid["Height_Inches"]
+            >= tallest_women_volleyball_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height greater than or equal to {tallest_women_volleyball_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+    if (
+        len(
+            womens_volleyball_valid[
+                womens_volleyball_valid["Height_Inches"]
+                <= shortest_women_volleyball_heights[-1]
+            ]
+        )
+        > 5
+    ):
+        print("\nWomen's Volleyball Team has height ties (shortest):")
+        tied_players = womens_volleyball_valid[
+            womens_volleyball_valid["Height_Inches"]
+            <= shortest_women_volleyball_heights[-1]
+        ]
+        print(
+            f"Total of {len(tied_players)} athletes with height less than or equal to {shortest_women_volleyball_heights[-1]} inches"
+        )
+        print("These athletes are:")
+        for i, (_, player) in enumerate(tied_players.iterrows(), 1):
+            print(
+                f"{i}. {player['Name']} ({player['School']}): {player['Height']} ({player['Height_Inches']} inches)"
+            )
+
+# Main function
+def main():
+    try:
+        # Load data
+        mens_swimming, womens_swimming, mens_volleyball, womens_volleyball = load_data()
+
+        # Display basic dataset information
+        print("\nDataset Information:")
+        print(f"Men's Swimming Team: {len(mens_swimming)} athletes")
+        print(f"Women's Swimming Team: {len(womens_swimming)} athletes")
+        print(f"Men's Volleyball Team: {len(mens_volleyball)} athletes")
+        print(f"Women's Volleyball Team: {len(womens_volleyball)} athletes")
+
+        # Calculate average heights
+        calculate_average_heights(
+            mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+        )
+
+        # Find tallest and shortest athletes
+        find_extreme_heights(
+            mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+        )
+
+        # Check for tie situations
+        check_ties(mens_swimming, womens_swimming, mens_volleyball, womens_volleyball)
+
+        print("\nAnalysis complete!")
+
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
     main()
