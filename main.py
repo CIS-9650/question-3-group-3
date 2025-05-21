@@ -1076,3 +1076,144 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def load_data():
+    """Load CSV files and return dataframes"""
+    print("Loading data files...")
+    mens_swimming = pd.read_csv("mens_swimming.csv")
+    womens_swimming = pd.read_csv("womens_swimming.csv")
+    mens_volleyball = pd.read_csv("mens_volleyball.csv")
+    womens_volleyball = pd.read_csv("womens_volleyball.csv")
+
+    return mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+
+
+def calculate_average_heights(
+    mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+):
+    """Calculate average heights for each team"""
+    # Calculate average using Height_Inches column, ignoring NaN values
+    mens_swimming_avg = mens_swimming["Height_Inches"].mean()
+    womens_swimming_avg = womens_swimming["Height_Inches"].mean()
+    mens_volleyball_avg = mens_volleyball["Height_Inches"].mean()
+    womens_volleyball_avg = womens_volleyball["Height_Inches"].mean()
+
+    return (
+        mens_swimming_avg,
+        womens_swimming_avg,
+        mens_volleyball_avg,
+        womens_volleyball_avg,
+    )
+
+
+def create_height_bar_chart(
+    mens_swimming_avg, womens_swimming_avg, mens_volleyball_avg, womens_volleyball_avg
+):
+    """Create a bar chart comparing average heights and save it to a file"""
+    # Data preparation
+    team_categories = [
+        "Men's Swimming",
+        "Women's Swimming",
+        "Men's Volleyball",
+        "Women's Volleyball",
+    ]
+    heights_in_inches = [
+        mens_swimming_avg,
+        womens_swimming_avg,
+        mens_volleyball_avg,
+        womens_volleyball_avg,
+    ]
+    heights_in_cm = [h * 2.54 for h in heights_in_inches]  # Convert inches to cm
+
+    # Set up the figure with a specific size
+    plt.figure(figsize=(10, 6))
+
+    # Set up bar positions
+    x = np.arange(len(team_categories))
+    width = 0.35
+
+    # Create bars
+    plt.bar(
+        x - width / 2,
+        heights_in_inches,
+        width,
+        label="Height (inches)",
+        color="royalblue",
+    )
+    plt.bar(
+        x + width / 2, heights_in_cm, width, label="Height (cm)", color="lightcoral"
+    )
+
+    # Add labels, title and legend
+    plt.xlabel("Team Categories")
+    plt.ylabel("Average Height")
+    plt.title("Average Height Comparison: Swimming vs. Volleyball Athletes")
+    plt.xticks(x, team_categories, rotation=45)
+    plt.legend()
+
+    # Add value labels on top of each bar
+    for i, v in enumerate(heights_in_inches):
+        plt.text(i - width / 2, v + 0.5, f'{v:.2f}"', ha="center", fontsize=9)
+
+    for i, v in enumerate(heights_in_cm):
+        plt.text(i + width / 2, v + 0.5, f"{v:.2f} cm", ha="center", fontsize=9)
+
+    # Adjust layout to make room for labels
+    plt.tight_layout()
+
+    # Save the figure
+    plt.savefig("height_comparison_chart.png", dpi=300)
+    plt.savefig("height_comparison_chart.jpg", dpi=300)
+
+    print(
+        "Chart saved as 'height_comparison_chart.png' and 'height_comparison_chart.jpg'"
+    )
+
+    # Show the plot (optional - comment out if running in a non-interactive environment)
+    plt.show()
+
+
+def main():
+    try:
+        # Load data
+        mens_swimming, womens_swimming, mens_volleyball, womens_volleyball = load_data()
+
+        # Calculate average heights
+        (
+            mens_swimming_avg,
+            womens_swimming_avg,
+            mens_volleyball_avg,
+            womens_volleyball_avg,
+        ) = calculate_average_heights(
+            mens_swimming, womens_swimming, mens_volleyball, womens_volleyball
+        )
+
+        # Display average heights
+        print("\nAverage Heights:")
+        print(
+            f"Men's Swimming Team: {mens_swimming_avg:.2f} inches ({mens_swimming_avg * 2.54:.2f} cm)"
+        )
+        print(
+            f"Women's Swimming Team: {womens_swimming_avg:.2f} inches ({womens_swimming_avg * 2.54:.2f} cm)"
+        )
+        print(
+            f"Men's Volleyball Team: {mens_volleyball_avg:.2f} inches ({mens_volleyball_avg * 2.54:.2f} cm)"
+        )
+        print(
+            f"Women's Volleyball Team: {womens_volleyball_avg:.2f} inches ({womens_volleyball_avg * 2.54:.2f} cm)"
+        )
+
+        # Create and save the chart
+        create_height_bar_chart(
+            mens_swimming_avg,
+            womens_swimming_avg,
+            mens_volleyball_avg,
+            womens_volleyball_avg,
+        )
+
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+
+
+if __name__ == "__main__":
+    main()
