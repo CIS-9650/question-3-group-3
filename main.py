@@ -1,4 +1,3 @@
-pip install "pandas>=1.3.0" "numpy>=1.20.0" "matplotlib>=3.4.0" "beautifulsoup4>=4.9.0" "requests>=2.25.0" "regex>=2021.4.4" "sqlalchemy>=1.4.0"
 import os
 import requests
 import pandas as pd
@@ -8,6 +7,9 @@ import time
 from urllib.parse import urlparse
 import argparse
 import sys # Import the sys module
+import sqlite3
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Constants definition
 HEADERS = {
@@ -1217,3 +1219,31 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+def info_to_database(mens_swimming, womens_swimming, mens_volleyball, womens_volleyball):
+
+    # Connect to (or create) the SQLite database
+    conn = sqlite3.connect("athlete_heights_database.db")
+    
+    # Save DataFrames to the database as separate tables
+    mens_swimming.to_sql("mens_swimming", conn, if_exists="replace", index=False)
+    womens_swimming.to_sql("womens_swimming", conn, if_exists="replace", index=False)
+    mens_volleyball.to_sql("mens_volleyball", conn, if_exists="replace", index=False)
+    womens_volleyball.to_sql("womens_volleyball", conn, if_exists="replace", index=False)
+
+    # commiting and closing out the connection to the database
+    conn.commit()
+    conn.close()
+
+    print("Data has been saved to to 'athlete_heights_database.db'")
+
+if __name__ == "__main__":
+    # Load data from CSVs
+    mens_swimming = pd.read_csv("mens_swimming.csv")
+    womens_swimming = pd.read_csv("womens_swimming.csv")
+    mens_volleyball = pd.read_csv("mens_volleyball.csv")
+    womens_volleyball = pd.read_csv("womens_volleyball.csv")
+    
+    # Create database
+    info_to_database(mens_swimming, womens_swimming, mens_volleyball, womens_volleyball)
+    print("Database created successfully!")
